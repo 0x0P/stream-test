@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>스트림 테스트</title>
+    <style>
+      .response {
+        border: 1px solid #000000;
+        border-radius: 1rem;
+        padding: 0.5rem;
+        min-height: 10rem;
+        white-space: pre-wrap;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.5em 1em;
+        background-color: #000000;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="response"></div>
+    <button class="start">시작</button>
+
+    <script>
+      document.querySelector(".start").addEventListener("click", function () {
+        fetch("http://localhost:3000/api/stream", {
+          method: "POST",
+        })
+          .then((response) => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            const div = document.querySelector(".response");
+
+            function read() {
+              reader.read().then(({ done, value }) => {
+                if (done) {
+                  console.log("끝");
+                  return;
+                }
+                div.innerText += decoder.decode(value, { stream: true });
+                read();
+              });
+            }
+
+            read();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
